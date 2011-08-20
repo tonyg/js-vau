@@ -1,0 +1,52 @@
+<html>
+<head>
+  <title>JS-vau Evaluator</title>
+  <script src="vau.js" type="text/javascript"></script>
+</head>
+<body>
+  <h1>JS-vau Evaluator</h1>
+  <div id="output">
+  </div>
+  <form id="evalform" onsubmit="return do_eval()">
+    <input type="text" name="input">
+    <input type="submit" value="eval">
+  </form>
+  <script type="text/javascript">
+var global_env = Vau.extend(Vau.baseenv);
+global_env.globals = global_env;
+global_env["+"] = function (a, b) { return a + b; };
+global_env["-"] = function (a, b) { return a - b; };
+global_env["*"] = function (a, b) { return a * b; };
+global_env["/"] = function (a, b) { return a / b; };
+function do_eval()
+{
+  var input = document.forms.evalform.input.value;
+  while (input) {
+    var readOutput;
+    var result;
+    try {
+      readOutput = Vau.read(input);
+      var form = readOutput[0];
+      input = readOutput[1];
+      if (form === undefined) break;
+      result = uneval(Vau.eval(form, global_env));
+    } catch (e) {
+      result = "EXCEPTION: " + uneval(e);
+    }
+    var resultDiv = document.createElement("div");
+    resultDiv.appendChild(document.createTextNode(result));
+    document.getElementById("output").appendChild(resultDiv);
+    document.forms.evalform.input.value = "";
+  }
+  return false;
+}
+  </script>
+  <p>
+    <small>
+      (This file based on
+      the <a href="https://github.com/manuel/schampignon/tree/fexpr-nt">schampignon</a>
+      evaluator by Manuel Simoni)
+    </small>
+  </p>
+</body>
+</html>

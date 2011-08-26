@@ -155,7 +155,11 @@ Vau.read = function (str) {
 	} else if (probe(num_re)) {
 	    emit(+match); // converts to a number (!!!)
 	} else if (probe(kw_re)) {
-	    emit(new Vau.Keyword(match));
+	    switch (match) {
+	      case "#t": emit(true); break;
+	      case "#f": emit(false); break;
+	      default: emit(new Vau.Keyword(match)); break;
+	    }
 	} else if (probe(str_re)) {
 	    var raw = match.substring(1, match.length - 1);
 	    emit(raw.replace(/\\("|\\)/g, function (wholematch, escaped) { return escaped; }));

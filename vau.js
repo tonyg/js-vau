@@ -120,7 +120,7 @@ Vau.read = function (str) {
 
     var ws_re = /^\s+/;
     var num_re = /^-?[0-9]+(\.[0-9]*)?([eE][-+]?[0-9]+)?/;
-    var str_re = /^"([^"]|\\")*"/;
+    var str_re = /^"([^\\"]|\\"|\\\\)*"/;
     var kw_re = /**/ /^#[-!@$%^&*_=+:<>/?a-zA-Z][-!@$%^&*_=+:<>/?a-zA-Z0-9]*/;
     var sym_re = /**/ /^[-!@$%^&*_=+:<>/?a-zA-Z][-!@$%^&*_=+:<>/?a-zA-Z0-9]*/;
     // Those /**/ comments are to unconfuse emacs' lexer.
@@ -157,7 +157,8 @@ Vau.read = function (str) {
 	} else if (probe(kw_re)) {
 	    emit(new Vau.Keyword(match));
 	} else if (probe(str_re)) {
-	    emit(match.substring(1, match.length - 1));
+	    var raw = match.substring(1, match.length - 1);
+	    emit(raw.replace(/\\("|\\)/g, function (wholematch, escaped) { return escaped; }));
 	} else if (probe(sym_re)) {
 	    emit(new Vau.Symbol(match));
 	} else if (str.charAt(0) === '(') {

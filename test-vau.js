@@ -72,3 +72,4 @@ te('($define! first ($lambda (f s) f))');
 te('($define! second ($lambda (f s) s))');
 te('(first 123 234)');
 te('(second 123 234)');
+te('"hello \\"world\\" \\\\ foo"');

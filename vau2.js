@@ -35,8 +35,8 @@ Vau.listToArray = function (xs) {
     return result;
 };
 
-Vau.arrayToList = function (a) {
-    var result = [];
+Vau.arrayToList = function (a, rightmost) {
+    var result = rightmost || null;
     for (var i = a.length - 1; i >= 0; i--) {
 	result = new Vau.Pair(a[i], result);
     }
@@ -432,8 +432,8 @@ Vau.baseenv.car = function (x) { return x.car; };
 Vau.baseenv.cdr = function (x) { return x.cdr; };
 
 Vau.baseenv["list*"] = function () {
-    return Vau.arrayToList(Array.prototype.slice.call(arguments, 0, arguments.length - 1)
-			     .concat(arguments[arguments.length - 1]));
+    return Vau.arrayToList(Array.prototype.slice.call(arguments, 0, arguments.length - 1),
+			   arguments[arguments.length - 1]);
 };
 
 Vau.baseenv["make-base-env"] = function () {

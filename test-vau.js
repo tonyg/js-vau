@@ -1,3 +1,4 @@
+window = {};
 load("vau2.js");
 
 var t_env = Vau.extend(Vau.baseenv);

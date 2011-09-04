@@ -1,0 +1,43 @@
+; -*- scheme -*-
+($begin
+  (display "Vau 0")
+
+  ($define! *base-env*
+    (($vau #ignore env env)))
+
+  ($define! $lambda
+    ($vau (formals . body) dynenv
+      (wrap (eval (list* $vau formals #ignore body) dynenv))))
+
+  ($define! list ($lambda x x))
+
+  ($define! cadr ($lambda (v) (car (cdr v))))
+
+  ($define! map
+    ($lambda (f xs)
+      ($if (null? xs)
+	   xs
+	   (cons (f (car xs)) (map f (cdr xs))))))
+
+  ($define! $let
+    ($vau (bindings . body) env
+      (eval (list* (list* $lambda (map car bindings) body)
+		   (map cadr bindings)) env)))
+
+  ($define! $cond
+    ($vau forms env
+      ($if (null? forms)
+	   #ignore
+	   ($let ((val (eval (car (car forms)) env)))
+	     ($if val
+		  (eval (list* $begin (cdr (car forms))) env)
+		  (eval (list* $cond (cdr forms)) env))))))
+
+  ($define! for-each
+    ($lambda (proc xs)
+      ($if (null? xs)
+	   #ignore
+	   ($begin (proc (car xs))
+		   (for-each proc (cdr xs))))))
+
+  )

@@ -460,3 +460,52 @@ Vau.baseenv["list*"] = function () {
 Vau.baseenv["make-base-env"] = function () {
     return Vau.extend(Vau.baseenv);
 };
+
+Vau.baseenv["applicative?"] = function (x) {
+    return x instanceof Vau.Applicative;
+};
+
+Vau.baseenv["operative?"] = function (x) {
+    return x instanceof Vau.Operative;
+};
+
+Vau.baseenv["make-js-function"] = function (op, env) {
+    return function () {
+	try {
+	    return Vau.eval(new Vau.Pair(op, Vau.arrayToList(arguments)), env);
+	} catch (e) {
+	    console.error(uneval(e));
+	}
+    };
+};
+
+if (window.XMLHttpRequest) {
+    Vau.baseenv["get-url"] = function (url, k) {
+	// Code from https://developer.mozilla.org/en/using_xmlhttprequest
+	var request = new XMLHttpRequest();
+	request.open('GET', url, true);
+	request.onreadystatechange = function (aEvt) {
+	    if (request.readyState == 4) {
+		k(request.status, request.statusText, request.responseText);
+	    }
+	};
+	request.send(null);
+    };
+}
+
+if (window.alert) {
+    Vau.baseenv["alert"] = alert;
+}
+
+Vau.baseenv["read-string"] = function (str) {
+    return Vau.read(str)[0];
+};
+
+Vau.loadPrelude = function () {
+    if (window.XMLHttpRequest) {
+	Vau.eval(Vau.read('(get-url "prelude.vau" (make-js-function ($vau (status status-text response-text) env (eval (read-string response-text) env)) (($vau #ignore env env))))')[0], Vau.baseenv);
+	return true;
+    } else {
+	return false;
+    }
+};

@@ -51,10 +51,11 @@ var _print = new Vau.Symbol("print");
 try {
     print(uneval(Vau.read("   ")));
     print(uneval(Vau.read(" -123.45e2")));
-    print(uneval(Vau.read("(this [is] legal)"))); // not yet it isn't
-    // I'd like to reserve [...] for Clojure-style (list ...) syntax.
     print(uneval(Vau.read("(#keyword #ignore)")));
     print(uneval(Vau.read("($define! (hello) \"world\") (rest)")));
+    print(uneval(Vau.read("; comment to end of line\n; another\n123456")));
+    print(uneval(Vau.read("(this [is] legal)"))); // not yet it isn't
+    // I'd like to reserve [...] for Clojure-style (list ...) syntax.
 } catch (e) {
     print(uneval(e));
 }

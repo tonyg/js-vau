@@ -49,7 +49,7 @@ Vau.read = function (str) {
     var result = undefined;
     var match;
 
-    var ws_re = /^\s+/;
+    var ws_re = /^(\s+|;.*)/;
     var num_re = /^-?[0-9]+(\.[0-9]*)?([eE][-+]?[0-9]+)?/;
     var str_re = /^"([^\\"]|\\"|\\\\)*"/;
     var kw_re = /**/ /^#[-!@$%^&*_=+:<>/?a-zA-Z][-!@$%^&*_=+:<>/?a-zA-Z0-9]*/;

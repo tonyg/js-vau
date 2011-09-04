@@ -191,7 +191,7 @@ Vau.KCombination = function (argtree, env, k) {
 Vau.KCombination.prototype.invoke = function (vm) {
     if (typeof vm.a === "function") {
 	Vau.evalargs(vm, this.argtree, null, this.env, new Vau.KPrimitiveApplier(vm.a, this.k));
-    } else if (typeof vm.a === "object") {
+    } else if (typeof vm.a === "object" && vm.a !== null && vm.a.invokeOp) {
 	vm.k = this.k;
 	vm.a.invokeOp(vm, this.env, this.argtree);
     } else {

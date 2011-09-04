@@ -153,6 +153,7 @@ Vau.VM.prototype.pushEval = function (exp, env) {
 Vau.VM.prototype.run = function () {
     while (this.k) {
 	var frame = this.k;
+	//print('/// ' + uneval(this.a) + ", " + uneval(frame.constructor.name));
 	this.k = "deliberately undefined continuation frame";
 	frame.invoke(this);
     }
@@ -163,6 +164,8 @@ Vau.KEval = function (env, k) {
     this.env = env;
     this.k = k;
 };
+
+Vau.KEval.name = "KEval";
 
 Vau.KEval.prototype.invoke = function (vm) {
     if (vm.a instanceof Vau.Symbol) {
@@ -188,6 +191,8 @@ Vau.KCombination = function (argtree, env, k) {
     this.k = k;
 };
 
+Vau.KCombination.name = "KCombination";
+
 Vau.KCombination.prototype.invoke = function (vm) {
     if (typeof vm.a === "function") {
 	Vau.evalargs(vm, this.argtree, null, this.env, new Vau.KPrimitiveApplier(vm.a, this.k));
@@ -205,6 +210,8 @@ Vau.KPrimitiveApplier = function (rator, k) {
     this.rator = rator;
     this.k = k;
 };
+
+Vau.KPrimitiveApplier.name = "KPrimitiveApplier";
 
 Vau.KPrimitiveApplier.prototype.invoke = function (vm) {
     vm.k = this.k;
@@ -227,6 +234,8 @@ Vau.KEvalArgs = function (remainder, revacc, env, k) {
     this.env = env;
     this.k = k;
 };
+
+Vau.KEvalArgs.name = "KEvalArgs";
 
 Vau.KEvalArgs.prototype.invoke = function (vm) {
     Vau.evalargs(vm, this.remainder, new Vau.Pair(vm.a, this.revacc), this.env, this.k);
@@ -285,6 +294,8 @@ Vau.KApplicativeApplier = function (underlying, env, k) {
     this.k = k;
 };
 
+Vau.KApplicativeApplier.name = "KApplicativeApplier";
+
 Vau.KApplicativeApplier.prototype.invoke = function (vm) {
     vm.k = this.k;
     vm.pushEval(new Vau.Pair(this.underlying, vm.a), this.env);
@@ -314,6 +325,8 @@ Vau.KEvalPrim1 = function (expexp, env, k) {
     this.k = k;
 };
 
+Vau.KEvalPrim1.name = "KEvalPrim1";
+
 Vau.KEvalPrim1.prototype.invoke = function (vm) {
     vm.k = new Vau.KEvalPrim2(vm.a, this.k);
     vm.pushEval(this.expexp, this.env);
@@ -323,6 +336,8 @@ Vau.KEvalPrim2 = function (env, k) {
     this.env = env;
     this.k = k;
 };
+
+Vau.KEvalPrim2.name = "KEvalPrim2";
 
 Vau.KEvalPrim2.prototype.invoke = function (vm) {
     vm.k = this.k;
@@ -344,6 +359,8 @@ Vau.KDefine = function (env, name, k) {
     this.name = name;
     this.k = k;
 };
+
+Vau.KDefine.name = "KDefine";
 
 Vau.KDefine.prototype.invoke = function (vm) {
     this.env[this.name.name] = vm.a;
@@ -370,6 +387,8 @@ Vau.KBegin = function (exps, env, k) {
     this.env = env;
     this.k = k;
 };
+
+Vau.KBegin.name = "KBegin";
 
 Vau.KBegin.prototype.invoke = function (vm) {
     vm.k = this.k;
@@ -410,6 +429,8 @@ Vau.KIf = function (trueBranch, falseBranch, env, k) {
     this.env = env;
     this.k = k;
 };
+
+Vau.KIf.name = "KIf";
 
 Vau.KIf.prototype.invoke = function (vm) {
     vm.k = this.k;

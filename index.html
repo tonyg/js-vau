@@ -12,6 +12,8 @@
     <input type="submit" value="eval">
   </form>
   <script type="text/javascript">
+Vau.baseenv["display"] = function (x) { display(uneval(x)); };
+Vau.loadPrelude();
 var global_env = Vau.extend(Vau.baseenv);
 global_env.globals = global_env;
 global_env["+"] = function (a, b) { return a + b; };
@@ -24,8 +26,7 @@ function display(x) {
   document.getElementById("output").appendChild(d);
   return d;
 }
-Vau.baseenv["display"] = function (x) { display(uneval(x)); };
-Vau.loadPrelude();
+global_env["window"] = window;
 function do_eval() {
   var input = document.forms.evalform.input.value;
   while (input) {

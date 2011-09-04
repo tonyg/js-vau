@@ -40,4 +40,96 @@
 	   ($begin (proc (car xs))
 		   (for-each proc (cdr xs))))))
 
+  ($define! @
+    ($vau (objexp name) env
+      (eval (list raw@ (eval objexp env) name) env)))
+
+  ($define! @=
+    ($vau (objexp name valexp) env
+      (eval (list raw@= (eval objexp env) name (eval valexp env)) env)))
+
+  ($define! apply
+    ($lambda (appv arg . opt)
+      (eval (cons (unwrap appv) arg)
+	    ($if (null? opt)
+		 (extend-env *base-env*)
+		 (car opt)))))
+
+  ($define! reverse
+    ($lambda (xs)
+      (reverse-onto xs ())))
+
+  ($define! reverse-onto
+    ($lambda (xs acc)
+      ($if (null? xs)
+	   acc
+	   (reverse-onto (cdr xs) (cons (car xs) acc)))))
+
+  ($define! not
+    ($lambda (x)
+      ($if x #f #t)))
+
+  ($define! mc-eval
+    ($lambda (exp env k)
+      ($cond
+       ((symbol? exp) (k (env-lookup env exp)))
+       ((not (pair? exp)) (k exp))
+       (#t (mc-eval (car exp) env (make-combiner (cdr exp) env k))))))
+
+  ($define! make-combiner
+    ($lambda (argtree env k)
+      ($lambda (rator)
+	($cond
+	 ((primitive-applicative? rator)
+	  (mc-eval-args argtree () env (make-primitive-applier rator k)))
+	 ((operative? rator)
+	  ($let ((newenv (extend-env (@ rator staticenv))))
+	    (mc-match! newenv (@ rator formals) argtree)
+	    (mc-match! newenv (@ rator envformal) env)
+	    (mc-eval (@ rator body) newenv k)))
+	 ((applicative? rator)
+	  (mc-eval-args argtree () env (make-applicative-combiner (@ rator underlying) env k)))
+	 ((primitive-operative? rator)
+	  (eval (list* rator argtree) env))
+	 (#t ($error mc-eval "Not a callable: ~v with argtree: ~v" rator argtree))))))
+
+  ($define! make-primitive-applier
+    ($lambda (rator k)
+      ($lambda (args)
+	(k (apply rator args)))))
+
+  ($define! make-applicative-combiner
+    ($lambda (op env k)
+      ($lambda (args)
+	(mc-eval (cons op args) env k))))
+
+  ($define! mc-eval-args
+    ($lambda (args revacc env k)
+      ($if (null? args)
+	   (k (reverse revacc))
+	   (mc-eval (car args) env
+		    ($lambda (v) (mc-eval-args (cdr args) (cons v revacc) env k))))))
+
+  ($define! $and
+    ($vau exps env
+      ($cond
+       ((null? exps) #t)
+       ((eval (car exps) env) (eval (cons $and (cdr exps)) env))
+       (#t #f))))
+
+  ($define! mc-match!
+    ($lambda (env pattern value)
+      ($cond
+       ((pair? pattern) ($if (pair? value)
+			     ($begin (mc-match! env (car pattern) (car value))
+				     (mc-match! env (cdr pattern) (cdr value)))
+			     (mismatch pattern value)))
+       ((symbol? pattern) (env-set! env pattern value))
+       (($and (keyword? pattern) (=== (@ pattern name) "#ignore")) #t)
+       ((=== pattern value) #t)
+       (#t (mismatch pattern value)))))
+
+  ($define! mismatch
+    ($lambda (pattern value)
+      ($error mc-match! "Mismatch: ~v != ~v" pattern value)))
   )

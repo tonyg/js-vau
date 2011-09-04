@@ -410,7 +410,16 @@ Vau.coreenv.wrap = function (underlying) {
 };
 
 Vau.coreenv.unwrap = function (applicative) {
-    return applicative.underlying;
+    if (applicative instanceof Vau.Applicative) {
+	return applicative.underlying;
+    } else if (typeof applicative === "function") {
+	return new Vau.Primitive(function (vm, dynenv, argtree) {
+	    vm.a = applicative.apply(null, Vau.listToArray(argtree));
+	});
+    } else {
+	throw {message: "Attempt to unwrap non-unwrappable object",
+	       object: applicative};
+    }
 };
 
 //---------------------------------------------------------------------------
@@ -457,8 +466,25 @@ Vau.baseenv["list*"] = function () {
 			   arguments[arguments.length - 1]);
 };
 
-Vau.baseenv["make-base-env"] = function () {
-    return Vau.extend(Vau.baseenv);
+Vau.baseenv["env-set!"] = function (env, sym, val) {
+    env[sym.name] = val;
+    return val;
+};
+
+Vau.baseenv["env-lookup"] = function (env, sym) {
+    return env[sym.name];
+};
+
+Vau.baseenv["extend-env"] = function (env) {
+    return Vau.extend(env);
+};
+
+Vau.baseenv["primitive-applicative?"] = function (x) {
+    return typeof x === "function";
+};
+
+Vau.baseenv["primitive-operative?"] = function (x) {
+    return x instanceof Vau.Primitive;
 };
 
 Vau.baseenv["applicative?"] = function (x) {
@@ -468,6 +494,34 @@ Vau.baseenv["applicative?"] = function (x) {
 Vau.baseenv["operative?"] = function (x) {
     return x instanceof Vau.Operative;
 };
+
+Vau.baseenv["symbol?"] = function (x) {
+    return x instanceof Vau.Symbol;
+};
+
+Vau.baseenv["keyword?"] = function (x) {
+    return x instanceof Vau.Keyword;
+};
+
+Vau.baseenv["==="] = function (a, b) {
+    return a === b;
+};
+
+Vau.to_string = function (x) {
+    if (typeof x === "string") return x;
+    if (x instanceof Vau.Symbol) return x.name;
+    if (x instanceof Vau.Keyword) return x.name.substring(1); // remove leading #
+    throw {message: "Cannot extract string from object", object: x};
+};
+
+Vau.baseenv["raw@"] = new Vau.Primitive(function (vm, dynenv, argtree) {
+    vm.a = argtree.car[Vau.to_string(argtree.cdr.car)];
+});
+
+Vau.baseenv["raw@="] = new Vau.Primitive(function (vm, dynenv, argtree) {
+    argtree.car[Vau.to_string(argtree.cdr.car)] = argtree.cdr.cdr.car;
+    vm.a = null;
+});
 
 Vau.baseenv["make-js-function"] = function (op, env) {
     return function () {

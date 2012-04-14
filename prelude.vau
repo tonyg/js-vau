@@ -132,4 +132,21 @@
   ($define! mismatch
     ($lambda (pattern value)
       ($error mc-match! "Mismatch: ~v != ~v" pattern value)))
+
+  ($define! foldr
+    ($lambda (c n xs)
+      ($if (null? xs)
+	   n
+	   (c (car xs) (foldr c n (cdr xs))))))
+
+  (display (foldr ($lambda (a d)
+		    (display a)
+		    (cons a d))
+		  ()
+		  (list 1 2 3)))
+  (display (foldr ($vau args env
+		    (display args)
+		    #shorted)
+		  ()
+		  (list 1 2 3)))
   )

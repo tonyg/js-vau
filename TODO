@@ -1,0 +1,4 @@
+ - Continuations are functions too! In vau3, some careful thinking will be
+   needed to make sure that operatives can't be returned from an applicative.
+   Applicatives will then become truly sealed, and a usable foundation for
+   cap-style security.
